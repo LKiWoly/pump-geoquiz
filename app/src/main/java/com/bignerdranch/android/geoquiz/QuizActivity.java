@@ -50,6 +50,7 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true)
     };
+    //test
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
