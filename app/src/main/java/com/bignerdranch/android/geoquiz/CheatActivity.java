@@ -13,18 +13,26 @@ import android.view.ViewAnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
+import static com.bignerdranch.android.geoquiz.Constants.*;
+
 public class CheatActivity extends AppCompatActivity {
 
-    private static final String EXTRA_ANSWER_IS_TRUE =
-            "com.bignerdranch.android.geoquiz.answer_is_true";
-    private static final String EXTRA_ANSWER_SHOWN =
-            "com.bignerdranch.android.geoquiz.answer_shown";
     private static final String TAG = "CheatActivity";
-    private boolean mAnswerIsTrue;
-    private boolean mIsAnswerShown;
-    private TextView mAnswerTextView;
-    private TextView mAPIVersionView;
-    private Button mShowAnswerButton;
+
+    private boolean answerIsTrue;
+    private boolean isAnswerShown;
+
+    private TextView answerTextView;
+    private TextView APIVersionView;
+
+    private Button showAnswerButton;
+
+    @Override
+    public void onSaveInstanceState(Bundle saveInstanceState) {
+        super.onSaveInstanceState(saveInstanceState);
+        Log.i(TAG, "onSaveInstanceState");
+        saveInstanceState.putBoolean(EXTRA_ANSWER_SHOWN, isAnswerShown);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,56 +40,63 @@ public class CheatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cheat);
 
         if (savedInstanceState != null) {
-            mIsAnswerShown = savedInstanceState.getBoolean(EXTRA_ANSWER_SHOWN, false);
+            isAnswerShown = savedInstanceState.getBoolean(EXTRA_ANSWER_SHOWN, false);
         }
 
-        mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
+        answerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
 
-        mAnswerTextView = findViewById(R.id.answer_text_view);
-        mAPIVersionView = findViewById(R.id.api_version_view);
-        mAPIVersionView.append("API level " + Build.VERSION.SDK_INT);
-        mShowAnswerButton = findViewById(R.id.show_answer_button);
-        if (mIsAnswerShown) {
+        initViews();
+
+        setOnClickListeners();
+
+        if (isAnswerShown) {
             setAnswerTextView();
-            mShowAnswerButton.setVisibility(View.INVISIBLE);
+            showAnswerButton.setVisibility(View.INVISIBLE);
         }
-        mShowAnswerButton.setOnClickListener((view) -> {
-                setAnswerTextView();
-                mIsAnswerShown = true;
-                setAnswerShownResult(mIsAnswerShown);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    int cx = mShowAnswerButton.getWidth() / 2;
-                    int cy = mShowAnswerButton.getHeight() / 2;
-                    float radius = mShowAnswerButton.getWidth();
-                    Animator anim = ViewAnimationUtils.createCircularReveal(
-                            mShowAnswerButton, cx, cy, radius, 0
-                    );
-                    anim.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mShowAnswerButton.setVisibility(View.INVISIBLE);
-                        }
-                    });
-                    anim.start();
-                } else {
-                    mShowAnswerButton.setVisibility(View.INVISIBLE);
+        setAnswerShownResult(isAnswerShown);
+    }
+
+    private void initViews() {
+        answerTextView = findViewById(R.id.answer_text_view);
+        APIVersionView = findViewById(R.id.api_version_view);
+        showAnswerButton = findViewById(R.id.show_answer_button);
+        APIVersionView.append("API level " + Build.VERSION.SDK_INT);
+    }
+
+    private void setOnClickListeners() {
+        showAnswerButton.setOnClickListener((view) -> {
+                    setAnswerTextView();
+                    isAnswerShown = true;
+                    setAnswerShownResult(isAnswerShown);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        int cx = showAnswerButton.getWidth() / 2;
+                        int cy = showAnswerButton.getHeight() / 2;
+                        float radius = showAnswerButton.getWidth();
+                        Animator anim = ViewAnimationUtils.createCircularReveal(
+                                showAnswerButton, cx, cy, radius, 0
+                        );
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                showAnswerButton.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                        anim.start();
+                    } else {
+                        showAnswerButton.setVisibility(View.INVISIBLE);
+                    }
                 }
-            }
         );
-
-
-
-
-        setAnswerShownResult(mIsAnswerShown);
     }
 
     private void setAnswerTextView() {
-        if (mAnswerIsTrue) {
-            mAnswerTextView.setText(R.string.true_button);
+        if (answerIsTrue) {
+            answerTextView.setText(R.string.true_button);
         } else {
-            mAnswerTextView.setText(R.string.false_button);
+            answerTextView.setText(R.string.false_button);
         }
     }
 
@@ -99,25 +114,5 @@ public class CheatActivity extends AppCompatActivity {
         Intent intent = new Intent(packageContext, CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue);
         return intent;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle saveInstanceState) {
-        super.onSaveInstanceState(saveInstanceState);
-        Log.i(TAG, "onSaveInstanceState");
-        saveInstanceState.putBoolean(EXTRA_ANSWER_SHOWN, mIsAnswerShown);
-    }
-    // onCreate methods
-
-    private void initViews(){
-
-    }
-
-    private void setOnClickListeners(){
-
-    }
-
-    private void restoreInstanceState(){
-
     }
 }

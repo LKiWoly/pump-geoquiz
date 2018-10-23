@@ -3,45 +3,38 @@ package com.bignerdranch.android.geoquiz;
 import java.io.Serializable;
 
 public class Question implements Serializable {
-    private int mTextResId;
-    private boolean mAnswerTrue;
-    private boolean mUserInput = false;
-    private boolean mIsCheat = false;
+    private int textResId;
+
+    private boolean answerTrue;
+    private boolean userInput = false;
+    private boolean isCheat = false;
 
     public Question(int textResId, boolean answerTrue) {
-        mTextResId = textResId;
-        mAnswerTrue = answerTrue;
+        this.textResId = textResId;
+        this.answerTrue = answerTrue;
     }
 
     public int getTextResId() {
-        return mTextResId;
-    }
-
-    public void setTextResId(int textResId) {
-        mTextResId = textResId;
+        return textResId;
     }
 
     public boolean isAnswerTrue() {
-        return mAnswerTrue;
-    }
-
-    public void setAnswerTrue(boolean answerTrue) {
-        mAnswerTrue = answerTrue;
+        return answerTrue;
     }
 
     public void setAlreadyDone() {
-        mUserInput = true;
+        userInput = true;
     }
 
     public boolean isAlreadyDone() {
-        return mUserInput;
+        return userInput;
     }
 
     public void cheatQuestion() {
-        mIsCheat = true;
+        isCheat = true;
     }
 
     public boolean isCheat() {
-        return mIsCheat;
+        return isCheat;
     }
 }
