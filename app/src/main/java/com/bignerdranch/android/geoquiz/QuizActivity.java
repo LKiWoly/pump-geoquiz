@@ -51,7 +51,7 @@ public class QuizActivity extends AppCompatActivity {
                 return;
             }
             if (CheatActivity.wasAnswerShown(data)) {
-                if(data.getBooleanExtra(EXTRA_ANSWER_SHOWN, false)) {
+                if (data.getBooleanExtra(EXTRA_ANSWER_SHOWN, false)) {
                     questionBank[currentIndex].cheatQuestion();
                     cheatsLeft--;
                     setTextCheatNumberView();
