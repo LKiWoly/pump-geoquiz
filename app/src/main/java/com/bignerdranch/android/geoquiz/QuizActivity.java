@@ -1,6 +1,5 @@
 package com.bignerdranch.android.geoquiz;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -42,27 +41,6 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true)
     };
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK) {
-            return;
-        }
-        if (requestCode == REQUEST_CODE_CHEAT) {
-            if (data == null) {
-                return;
-            }
-            if (CheatActivity.wasAnswerShown(data)) {
-                if (data.getBooleanExtra(EXTRA_ANSWER_SHOWN, false)) {
-                    questionBank[currentIndex].cheatQuestion();
-                    cheatsLeft--;
-                    setTextCheatNumberView();
-                    cheatButton.setEnabled(false);
-                    setAnswersButtonsColor();
-                }
-            }
-        }
-    }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -111,29 +89,31 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void setOnClickListeners() {
-        questionTextView.setOnClickListener(v -> {
-            currentIndex = (currentIndex + 1) % questionBank.length;
-            updateQuestion();
-        });
-
         nextButton.setOnClickListener(v -> {
-            currentIndex = (currentIndex + 1) % questionBank.length;
+            currentIndex += 1;
             updateQuestion();
         });
 
         prevButton.setOnClickListener(v -> {
             currentIndex -= 1;
-            if (currentIndex < 0) {
-                currentIndex = questionBank.length + currentIndex;
-            }
             updateQuestion();
         });
 
         cheatButton.setOnClickListener(v -> {
             setTextCheatNumberView();
-            boolean answerIsTrue = questionBank[currentIndex].isAnswerTrue();
-            Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
-            startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            AlertDialog.Builder builder = new AlertDialog.Builder(QuizActivity.this);
+            builder.setTitle(R.string.warning_text)
+                    .setPositiveButton(R.string.show_answer_button, (dialog, which) -> {
+                        questionBank[currentIndex].cheatQuestion();
+                        cheatsLeft--;
+                        setAnswersButtonsColor();
+                        setTextCheatNumberView();
+                        cheatButton.setEnabled(false);
+                    })
+                    .setNegativeButton(R.string.cancel_button, (dialog, which) -> {
+
+                    });
+            builder.show();
         });
 
         trueButton.setOnClickListener(v -> {
@@ -173,7 +153,9 @@ public class QuizActivity extends AppCompatActivity {
         prevButton.setEnabled(true);
         nextButton.setEnabled(true);
 
-        if (questionBank[currentIndex].isAlreadyDone() || questionBank[currentIndex].isCheat()) {
+        if (questionBank[currentIndex].isAlreadyDone()
+                || questionBank[currentIndex].isCheat()
+                || cheatsLeft == 0) {
             cheatButton.setEnabled(false);
         }
 
@@ -206,21 +188,25 @@ public class QuizActivity extends AppCompatActivity {
         questionBank[currentIndex].setAlreadyDone();
 
         if (numAnswers == questionBank.length) {
-            AlertDialog.Builder ad = new AlertDialog.Builder(QuizActivity.this);
-            ad.setTitle("Finish!");
-            ad.setMessage("Your score: " + score);
-            ad.setPositiveButton(R.string.start_game_again_button, (dialog, which) -> {
-                Intent intent = new Intent(QuizActivity.this, QuizActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                QuizActivity.this.startActivity(intent);
-                Runtime.getRuntime().exit(0);
-            });
-            ad.setNegativeButton(R.string.finish_game_button, (dialog, which) -> {
-                android.os.Process.killProcess(android.os.Process.myPid());
-                System.exit(0);
-            });
-            ad.show();
+            createResultScreen();
         }
+    }
+
+    private void createResultScreen() {
+        AlertDialog.Builder ad = new AlertDialog.Builder(QuizActivity.this);
+        ad.setTitle("Finish!");
+        ad.setMessage("Your score: " + score);
+        ad.setPositiveButton(R.string.start_game_again_button, (dialog, which) -> {
+            Intent intent = new Intent(QuizActivity.this, QuizActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            QuizActivity.this.startActivity(intent);
+            Runtime.getRuntime().exit(0);
+        });
+        ad.setNegativeButton(R.string.finish_game_button, (dialog, which) -> {
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(0);
+        });
+        ad.show();
     }
 
     private void setAnswersButtonsColor() {
