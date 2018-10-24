@@ -1,6 +1,7 @@
 package com.bignerdranch.android.geoquiz;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -168,11 +169,14 @@ public class QuizActivity extends AppCompatActivity {
 
         setAnswersButtonsColor();
 
-        cheatButton.setEnabled(!questionBank[currentIndex].isAlreadyDone());
-        cheatButton.setEnabled(!questionBank[currentIndex].isCheat());
-
+        cheatButton.setEnabled(true);
         prevButton.setEnabled(true);
         nextButton.setEnabled(true);
+
+        if (questionBank[currentIndex].isAlreadyDone() || questionBank[currentIndex].isCheat()) {
+            cheatButton.setEnabled(false);
+        }
+
         if (currentIndex == 0) {
             prevButton.setEnabled(false);
         }
@@ -200,11 +204,22 @@ public class QuizActivity extends AppCompatActivity {
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
         questionBank[currentIndex].setAlreadyDone();
-        trueButton.setEnabled(false);
-        falseButton.setEnabled(false);
+
         if (numAnswers == questionBank.length) {
-            Toast.makeText(this, "Your score: " + score + "/" + numAnswers,
-                    Toast.LENGTH_LONG).show();
+            AlertDialog.Builder ad = new AlertDialog.Builder(QuizActivity.this);
+            ad.setTitle("Finish!");
+            ad.setMessage("Your score: " + score);
+            ad.setPositiveButton(R.string.start_game_again_button, (dialog, which) -> {
+                Intent intent = new Intent(QuizActivity.this, QuizActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                QuizActivity.this.startActivity(intent);
+                Runtime.getRuntime().exit(0);
+            });
+            ad.setNegativeButton(R.string.finish_game_button, (dialog, which) -> {
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(0);
+            });
+            ad.show();
         }
     }
 
