@@ -2,10 +2,11 @@ package com.bignerdranch.android.geoquiz;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -56,6 +57,7 @@ public class QuizActivity extends AppCompatActivity {
                     cheatsLeft--;
                     setTextCheatNumberView();
                     cheatButton.setEnabled(false);
+                    setAnswersButtonsColor();
                 }
             }
         }
@@ -164,6 +166,8 @@ public class QuizActivity extends AppCompatActivity {
         trueButton.setEnabled(!questionBank[currentIndex].isAlreadyDone());
         falseButton.setEnabled(!questionBank[currentIndex].isAlreadyDone());
 
+        setAnswersButtonsColor();
+
         cheatButton.setEnabled(!questionBank[currentIndex].isAlreadyDone());
         cheatButton.setEnabled(!questionBank[currentIndex].isCheat());
 
@@ -181,7 +185,7 @@ public class QuizActivity extends AppCompatActivity {
         numAnswers++;
         boolean answerIsTrue = questionBank[currentIndex].isAnswerTrue();
 
-        int messageResId = 0;
+        int messageResId;
 
         if (questionBank[currentIndex].isCheat()) {
             messageResId = R.string.judgment_toast;
@@ -201,6 +205,21 @@ public class QuizActivity extends AppCompatActivity {
         if (numAnswers == questionBank.length) {
             Toast.makeText(this, "Your score: " + score + "/" + numAnswers,
                     Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setAnswersButtonsColor() {
+        if (questionBank[currentIndex].isCheat()) {
+            if (questionBank[currentIndex].isAnswerTrue()) {
+                trueButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+                falseButton.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+            } else {
+                trueButton.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+                falseButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+            }
+        } else {
+            trueButton.getBackground().clearColorFilter();
+            falseButton.getBackground().clearColorFilter();
         }
     }
 }
